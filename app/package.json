@@ -6,9 +6,12 @@
     "main": "server.js",
     "scripts": {
         "start": "node index.js",
-        "start:dev" : "nodemon index.js"
+        "start:dev": "nodemon index.js"
     },
     "dependencies": {
+        "dotenv-safe": "^8.2.0",
+        "jsonwebtoken": "^9.0.2",
+        "pg": "^8.11.3",
         "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.33.0"
     },
     "devDependencies": {
