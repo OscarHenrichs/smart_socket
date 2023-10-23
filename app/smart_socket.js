@@ -17,7 +17,7 @@ app.ws("/", {
 	upgrade: (res, req, context) => {
 		console.log("An Htts connection wants to become WebSocket, URL: " + req.getUrl() + "!");
 		try {
-			res.user = decodeJwtCookie(req.getHeader("user_id"), req.getHeader("pass"), req.getHeader("login"));
+			res.user = decodeJwtCookie(req);
 		} catch {
 			return res.writeStatus("401").end();
 		}
@@ -44,14 +44,10 @@ app.ws("/", {
 	},
 });
 
-function decodeJwtCookie(user_id, pass, login) {
-	const userId = user_id;
-	const pass_code = pass;
-	const login_char = login;
+function decodeJwtCookie(req) {
+	const token = req.headers["authorization"];
 
-	if (pass_code != 1234 || login_char != "smart") {
-		throw new TypeError("Sem auth");
-	}
+	globa
 
 	return userId;
 }
@@ -75,7 +71,7 @@ const config = {
 	pg.types.setTypeParser(pg.types.builtins.TIMESTAMP, (str) => str);
 	pg.types.setTypeParser(pg.types.builtins.TIMESTAMPTZ, (str) => str);
 	var pool = new Pool(config);
-	var client = await pool.connect();
+	global.pool = await pool.connect();
 	try {
 		app.listen(9001, (listenSocket) => {
 			if (listenSocket) {
