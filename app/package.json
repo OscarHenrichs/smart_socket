@@ -1,0 +1,17 @@
+{
+    "name": "smart_socket",
+    "version": "1.0.0",
+    "description": "",
+    "author": "First Last <first.last@example.com>",
+    "main": "server.js",
+    "scripts": {
+        "start": "node index.js",
+        "start:dev" : "nodemon index.js"
+    },
+    "dependencies": {
+        "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.33.0"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.1"
+    }
+}
