@@ -1,23 +1,20 @@
-const app = require("uWebSockets.js").App({
-	maxPayloadLength: 10 * 1024 * 1024 * 1024,
+const app = require("uWebSockets.js").SSLApp({
 	key_file_name: "misc/key.pem",
 	cert_file_name: "misc/cert.pem",
 });
 const Pool = require("pg-pool");
 const pg = require("pg");
+const jwt = require("jsonwebtoken");
 require("dotenv-safe").config({ allowEmptyValues: true });
 
 app.ws("/", {
 	idleTimeout: 32,
 	maxBackpressure: 1024,
 	maxPayloadLength: 512,
-	open: async (socket, request) => {
-		global.app = app;
-	},
 	upgrade: (res, req, context) => {
 		console.log("An Htts connection wants to become WebSocket, URL: " + req.getUrl() + "!");
 		try {
-			res.user = decodeJwtCookie(req);
+			obj = decodeJwtCookie(req);
 		} catch {
 			return res.writeStatus("401").end();
 		}
@@ -44,12 +41,63 @@ app.ws("/", {
 	},
 });
 
-function decodeJwtCookie(req) {
-	const token = req.headers["authorization"];
+function decodeJwtCookie(req, res) {
+	let token = req.headers["authorization"];
 
-	globa
+	if (!token) {
+		client.release(true);
+		return res.status(401).send({ auth: false, error: req.__("tokenNotFound") });
+	}
+	token = token.replace("Bearer ", "");
+	let secret = process.env.TOKEN_SECRET;
+	jwt.verify(token, secret, async function (err, decoded) {
+		if (err) {
+			client.release(true);
+			return { auth: false, error: "tokenInvalid" };
+		}
+		let currentDateTime = new Date();
+		const expiresAt = decoded.expiresAt;
+		let expireDate = moment(expiresAt * 1000).toDate();
+		if (currentDateTime > expireDate) {
+			client.release(true);
+			return { auth: false, error: "tokenExpired" };
+		}
+		let sql = "";
 
-	return userId;
+		let userId = decoded.user_id;
+		let callerId = decoded.caller;
+		if (userId != undefined) {
+			if (callerId == constants.tokenCallerApp) {
+				sql = `SELECT user_id FROM users WHERE user_id = ${userId} AND user_token = '${token}'`;
+			} else {
+				sql = `SELECT user_id FROM users WHERE user_id = ${userId} AND user_web_token = '${token}'`;
+			}
+		} else {
+			let adminId = decoded.admin_id;
+			if (adminId != undefined) {
+				sql = `SELECT admin_id FROM admin WHERE admin_id = ${adminId} AND admin_token = '${token}'`;
+			}
+		}
+
+		if (sql.length == 0) {
+			return { auth: false, error: "authFailed" };
+		}
+		global.client
+			.query(sql)
+			.then(async (result) => {
+				client.release(true);
+				if ((result.rows.length = 0)) {
+					return { auth: false, error: "authFailed" };
+				}
+				next();
+			})
+			.catch(async (err) => {
+				console.log(chalk.red("%s"), err);
+				client.release(true);
+				return { auth: false, error: "databaseError" };
+			});
+	});
+	return { auth: true, user_id: userId };
 }
 
 const config = {
@@ -71,7 +119,7 @@ const config = {
 	pg.types.setTypeParser(pg.types.builtins.TIMESTAMP, (str) => str);
 	pg.types.setTypeParser(pg.types.builtins.TIMESTAMPTZ, (str) => str);
 	var pool = new Pool(config);
-	global.pool = await pool.connect();
+	global.client = await pool.connect();
 	try {
 		app.listen(9001, (listenSocket) => {
 			if (listenSocket) {
@@ -79,6 +127,6 @@ const config = {
 			}
 		});
 	} finally {
-		client.release();
+		global.client.release();
 	}
 })().catch((e) => console.error(e.message, e.stack));
