@@ -1,20 +1,20 @@
 {
-    "name": "smart_socket",
-    "version": "1.0.0",
-    "description": "",
-    "author": "First Last <first.last@example.com>",
-    "main": "server.js",
-    "scripts": {
-        "start": "node index.js",
-        "start:dev": "nodemon index.js"
-    },
-    "dependencies": {
-        "dotenv-safe": "^8.2.0",
-        "jsonwebtoken": "^9.0.2",
-        "pg": "^8.11.3",
-        "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.33.0"
-    },
-    "devDependencies": {
-        "nodemon": "^3.0.1"
-    }
+	"name": "smart_socket",
+	"version": "1.0.0",
+	"description": "",
+	"author": "First Last <first.last@example.com>",
+	"main": "server.js",
+	"scripts": {
+		"start": "node smart_socket.js",
+		"start:dev": "nodemon smart_socket.js"
+	},
+	"dependencies": {
+		"dotenv-safe": "^8.2.0",
+		"jsonwebtoken": "^9.0.2",
+		"pg-pool": "^3.6.1",
+		"uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.33.0"
+	},
+	"devDependencies": {
+		"nodemon": "^3.0.1"
+	}
 }
