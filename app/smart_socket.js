@@ -24,7 +24,7 @@ require("uWebSockets.js")
 				const projectId = req.getParameter(0);
 				const taskId = req.getParameter(1);
 				const auth = req.getParameter(2);
-
+				console.log("task/" + projectId + "/" + taskId + "/" + auth);
 				const hash = crypto.encryptData("task/" + projectId + "/" + taskId + "/" + auth);
 				console.log(hash);
 				console.log(crypto.decryptData(hash));
