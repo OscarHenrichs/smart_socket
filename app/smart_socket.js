@@ -50,7 +50,7 @@ require("uWebSockets.js")
 		},
 		open: (ws) => {
 			const userData = ws.getUserData();
-			
+
 			ws.subscribe(`${constants.broadCastTask}/${userData.task_id}`);
 			ws.subscribe(`${constants.broadCastUser}/${userData.user_id}`);
 		},
@@ -138,6 +138,7 @@ require("uWebSockets.js")
 				}
 
 				if (res.user.auth != undefined) {
+					console.log(res.user);
 					return res
 						.cork(() => {
 							res.writeStatus("401").write(JSON.stringify({ error: "Unauthorized A" }));
