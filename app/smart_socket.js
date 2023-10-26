@@ -1,6 +1,6 @@
 const decodeJWT = require("./modules/auth.js");
 require("uWebSockets.js")
-	.SSLApp({
+	.App({
 		key_file_name: "./misc/key.pem",
 		cert_file_name: "./misc/cert.pem",
 	})
