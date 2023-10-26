@@ -50,14 +50,12 @@ require("uWebSockets.js")
 		},
 		open: (ws) => {
 			const userData = ws.getUserData();
-			ws.subscribe(`${constants.broadCastProject}/${userData.projectId}`);
 			ws.subscribe(`${constants.broadCastTask}/${userData.taskId}`);
 			ws.subscribe(`${constants.broadCastUser}/${userData.user_id}`);
 		},
 		message: (ws, message, isBinary) => {
 			const userData = ws.getUserData();
-			ws.publish(`${constants.broadCastProject}/${userData.project_id}`, message, isBinary);
-			ws.publish(`${constants.broadCastTask}/${userData.task_id}`, message, isBinary);
+			ws.publish(`${constants.broadCastTask}/${userData.taskId}`, message, isBinary);
 			ws.publish(`${constants.broadCastUser}/${userData.user_id}`, message, isBinary);
 		},
 		drain: (ws) => {},
@@ -111,57 +109,6 @@ require("uWebSockets.js")
 		open: async (ws) => {
 			const userData = ws.getUserData();
 			ws.subscribe(`broadcast/user/${userData.user_id}`);
-		},
-		drain: (ws) => {},
-		close: (ws, code, message) => {},
-	})
-	.ws("/broadcast/project/:project_id", {
-		idleTimeout: 0,
-		maxBackpressure: 1024,
-		maxPayloadLength: 512,
-		upgrade: async (res, req, context) => {
-			const database = require("./database/database.js")();
-			res.onAborted(() => {
-				res.aborted = true;
-			});
-			console.log("An Htts connection wants to become WebSocket, URL: " + req.getUrl() + "!");
-
-			try {
-				const key = req.getHeader("sec-websocket-key");
-				const protocol = req.getHeader("sec-websocket-protocol");
-				const extensions = req.getHeader("sec-websocket-extensions");
-				const token = req.getHeader("authorization");
-				const projectId = req.getParameter(0);
-				res.user = await decodeJWT(token, database);
-
-				if (res.aborted) {
-					return;
-				}
-
-				if (res.user.auth != undefined) {
-					return res
-						.cork(() => {
-							res.writeStatus("401").write(JSON.stringify({ error: "Unauthorized A" }));
-						})
-						.endWithoutBody();
-				}
-
-				return res.upgrade({ project_id: projectId }, key, protocol, extensions, context);
-			} catch {
-				return res
-					.cork(() => {
-						res.writeStatus("401").write(JSON.stringify({ error: "Unauthorized B" }));
-					})
-					.endWithoutBody();
-			}
-		},
-		open: async (ws) => {
-			const userData = ws.getUserData();
-			ws.subscribe(`broadcast/project/${userData.project_id}`);
-		},
-		message: (ws, message, isBinary) => {
-			const userData = ws.getUserData();
-			ws.publish(`broadcast/project/${userData.project_id}`, message, isBinary);
 		},
 		drain: (ws) => {},
 		close: (ws, code, message) => {},
