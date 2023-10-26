@@ -4,7 +4,7 @@ const { redisConnect, storeBroadcastRoom, removeBroadcastRoom, getBroadcastRoom 
 
 require("uWebSockets.js")
 	.App()
-	.ws("/task/:project_id/:task_id", {
+	.ws("/task/:project_id/:task_id/:auth", {
 		idleTimeout: 120,
 		maxBackpressure: 1024,
 		maxPayloadLength: 512,
