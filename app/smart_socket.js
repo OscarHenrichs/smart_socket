@@ -1,4 +1,4 @@
-const decodeJWT = require("./auth/auth.js");
+const decodeJWT = require("./modules/auth.js");
 require("uWebSockets.js")
 	.SSLApp({
 		key_file_name: "./misc/key.pem",
@@ -9,7 +9,6 @@ require("uWebSockets.js")
 		maxBackpressure: 1024,
 		maxPayloadLength: 512,
 		upgrade: async (res, req, context) => {
-			
 			const database = require("./database/database.js")();
 			res.onAborted(() => {
 				res.aborted = true;
@@ -32,22 +31,27 @@ require("uWebSockets.js")
 						.cork(() => {
 							res.writeStatus("401").write(JSON.stringify({ error: "Unauthorized" }));
 						})
-						.close();
+						.endWithoutBody();
 				}
 
-				return res.upgrade({ user_id: res.user }, key, protocol, extensions, context);
+				return res.upgrade({ user_id: res.user, task_id: 233, project_id: 33 }, key, protocol, extensions, context);
 			} catch {
 				return res
 					.cork(() => {
 						res.writeStatus("401").write(JSON.stringify({ error: "Unauthorized" }));
 					})
-					.close();
+					.endWithoutBody();
 			}
 		},
-		open: (ws) => console.log("open-ws", ws.uid),
+		open: (ws) => console.log("open-ws"),
 		message: (ws, message, isBinary) => {
 			let ok = ws.send(message, isBinary, true);
 		},
+	})
+	.any("/*", (res, req) => {
+		res.cork(() => {
+			res.writeStatus("401").write(JSON.stringify({ error: "Unauthorized" }));
+		}).endWithoutBody();
 	})
 	.listen(9001, (listenSocket) => {
 		if (listenSocket) {

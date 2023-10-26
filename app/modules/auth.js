@@ -3,23 +3,25 @@ const moment = require("moment");
 const constants = require("../config/constants.js");
 require("dotenv-safe").config({ allowEmptyValues: true });
 
-
 const decodeJWT = (token, database) => {
 	return new Promise(async (resolve, reject) => {
 		let pool = await database.getConnection();
 		pool.connect(function (err, client, done) {
 			if (err) {
 				client.release(true);
+				console.log("Error connecting to pg server" + err.stack);
 				return resolve({ auth: false, error: err });
 			}
 			if (!token) {
 				client.release(true);
+				console.log("Error token not found");
 				return reject({ auth: false, error: "tokenNotFound" });
 			}
 			token = token.replace("Bearer ", "");
 			let secret = process.env.TOKEN_SECRET;
 			jwt.verify(token, secret, async function (err, decoded) {
 				if (err) {
+					console.log("Error token invalid");
 					return resolve({ auth: false, error: "tokenInvalid" });
 				}
 				let currentDateTime = new Date();
@@ -70,6 +72,5 @@ const decodeJWT = (token, database) => {
 		});
 	});
 };
-
 
 module.exports = decodeJWT;

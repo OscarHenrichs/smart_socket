@@ -15,6 +15,7 @@
 		"moment": "^2.29.4",
 		"moment-timezone": "^0.5.43",
 		"pg-pool": "^3.6.1",
+		"redis": "^4.6.10",
 		"uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.33.0"
 	},
 	"devDependencies": {
