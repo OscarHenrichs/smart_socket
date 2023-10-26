@@ -7,7 +7,7 @@ require("uWebSockets.js")
 		key_file_name: "./misc/key.pem",
 		cert_file_name: "./misc/cert.pem",
 	})
-	.ws("/task/:project_id/:task_id", {
+	.ws("/", {
 		idleTimeout: 120,
 		maxBackpressure: 1024,
 		maxPayloadLength: 512,
