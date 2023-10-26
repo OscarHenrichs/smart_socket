@@ -79,8 +79,18 @@
     
 10.Install Redis
 
-echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list
-   
-sudo apt update
+    echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list
+    
+    sudo apt update
 
-sudo apt install redis
+    sudo apt install redis
+
+11.Let's encrypt
+
+    sudo add-apt-repository ppa:certbot/certbot
+
+    sudo apt update
+
+    sudo apt install python3-certbot-nginx
+
+    sudo certbot --nginx -d dev.websocket.smartcitizen.tec.br

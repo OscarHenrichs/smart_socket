@@ -4,8 +4,8 @@ const { redisConnect, storeBroadcastRoom, removeBroadcastRoom, getBroadcastRoom 
 
 require("uWebSockets.js")
 	.SSLApp({
-		key_file_name: "./misc/key.pem",
-		cert_file_name: "./misc/cert.pem",
+		cert_file_name: "/etc/letsencrypt/live/dev.websocket.smartcitizen.tec.br/fullchain.pem;",
+		key_file_name: "/etc/letsencrypt/live/dev.websocket.smartcitizen.tec.br/privkey.pem;",
 	})
 	.ws("/", {
 		idleTimeout: 120,
