@@ -1,6 +1,7 @@
 const constants = require("./config/constants.js");
 const decodeJWT = require("./modules/auth.js");
-const crypto = require("crypto");
+const crypto = require("./modules/crypto.js");
+
 const { redisConnect, storeBroadcastRoom, removeBroadcastRoom, getBroadcastRoom } = require("./modules/redis.js");
 
 require("uWebSockets.js")
@@ -23,6 +24,11 @@ require("uWebSockets.js")
 				const projectId = req.getParameter(0);
 				const taskId = req.getParameter(1);
 				const auth = req.getParameter(2);
+
+				const hash = crypto.encryptData("task/" + projectId + "/" + taskId + "/" + auth);
+				console.log(hash);
+				console.log(crypto.decryptData(hash));
+				crypto.decryptData(hash);
 				res.user = await decodeJWT(auth, database);
 
 				if (res.aborted) {
