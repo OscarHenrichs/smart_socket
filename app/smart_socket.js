@@ -1,10 +1,13 @@
+const constants = require("./config/constants.js");
 const decodeJWT = require("./modules/auth.js");
+const { redisConnect, storeBroadcastRoom, removeBroadcastRoom, getBroadcastRoom } = require("./modules/redis.js");
+
 require("uWebSockets.js")
 	.SSLApp({
 		key_file_name: "./misc/key.pem",
 		cert_file_name: "./misc/cert.pem",
 	})
-	.ws("/task/location", {
+	.ws("/task/:project_id/:task_id", {
 		idleTimeout: 60,
 		maxBackpressure: 1024,
 		maxPayloadLength: 512,
@@ -49,21 +52,25 @@ require("uWebSockets.js")
 		},
 		open: (ws) => {
 			const userData = ws.getUserData();
-			const topic = `broadcast/project_${userData.project_id}/task_${userData.task_id}`;
-			console.log("open", topic);
-			ws.subscribe("broadcast");
+			ws.subscribe(`${constants.broadCastProject}/${userData.projectId}`);
+			ws.subscribe(`${constants.broadCastTask}/${userData.taskId}`);
+			ws.subscribe(`${constants.broadCastUser}/${userData.user_id}`);
 		},
 		message: (ws, message, isBinary) => {
 			const userData = ws.getUserData();
-			const topic = `broadcast/project_${userData.project_id}/task_${userData.task_id}`;
-			ws.publish("broadcast", message, isBinary);
+			ws.publish(`${constants.broadCastProject}/${userData.project_id}`, message, isBinary);
+			ws.publish(`${constants.broadCastTask}/${userData.task_id}`, message, isBinary);
+			ws.publish(`${constants.broadCastUser}/${userData.user_id}`, message, isBinary);
 		},
 		drain: (ws) => {},
 		close: (ws, code, message) => {
-			/* The library guarantees proper unsubscription at close */
+			const userData = ws.getUserData();
+			ws.unsubscribe(`${constants.broadCastProject}/${userData.project_id}`);
+			ws.unsubscribe(`${constants.broadCastTask}/${userData.task_id}`);
+			ws.unsubscribe(`${constants.broadCastUser}/${userData.user_id}`);
 		},
 	})
-	.ws("/broadcast", {
+	.ws("/broadcast/user/:user_id", {
 		idleTimeout: 0,
 		maxBackpressure: 1024,
 		maxPayloadLength: 512,
@@ -79,6 +86,7 @@ require("uWebSockets.js")
 				const protocol = req.getHeader("sec-websocket-protocol");
 				const extensions = req.getHeader("sec-websocket-extensions");
 				const token = req.getHeader("authorization");
+				const userId = req.getParameter(0);
 				res.user = await decodeJWT(token, database);
 
 				if (res.aborted) {
@@ -93,7 +101,7 @@ require("uWebSockets.js")
 						.endWithoutBody();
 				}
 
-				return res.upgrade({ user_id: res.user, task_id: 233, project_id: 33 }, key, protocol, extensions, context);
+				return res.upgrade({ user_id: userId }, key, protocol, extensions, context);
 			} catch {
 				return res
 					.cork(() => {
@@ -102,19 +110,114 @@ require("uWebSockets.js")
 					.endWithoutBody();
 			}
 		},
-		open: (ws) => {
-			console.log("open");
-			ws.subscribe("broadcast/#");
-
-			ws.getTopics().forEach((topic) => {
-				console.log("open A", topic);
-				ws.subscribe(topic);
-			});
+		open: async (ws) => {
+			const userData = ws.getUserData();
+			ws.subscribe(`broadcast/user/${userData.user_id}`);
 		},
 		drain: (ws) => {},
-		close: (ws, code, message) => {
-			/* The library guarantees proper unsubscription at close */
+		close: (ws, code, message) => {},
+	})
+	.ws("/broadcast/project/:project_id", {
+		idleTimeout: 0,
+		maxBackpressure: 1024,
+		maxPayloadLength: 512,
+		upgrade: async (res, req, context) => {
+			const database = require("./database/database.js")();
+			res.onAborted(() => {
+				res.aborted = true;
+			});
+			console.log("An Htts connection wants to become WebSocket, URL: " + req.getUrl() + "!");
+
+			try {
+				const key = req.getHeader("sec-websocket-key");
+				const protocol = req.getHeader("sec-websocket-protocol");
+				const extensions = req.getHeader("sec-websocket-extensions");
+				const token = req.getHeader("authorization");
+				const projectId = req.getParameter(0);
+				res.user = await decodeJWT(token, database);
+
+				if (res.aborted) {
+					return;
+				}
+
+				if (res.user.auth != undefined) {
+					return res
+						.cork(() => {
+							res.writeStatus("401").write(JSON.stringify({ error: "Unauthorized A" }));
+						})
+						.endWithoutBody();
+				}
+
+				return res.upgrade({ project_id: projectId }, key, protocol, extensions, context);
+			} catch {
+				return res
+					.cork(() => {
+						res.writeStatus("401").write(JSON.stringify({ error: "Unauthorized B" }));
+					})
+					.endWithoutBody();
+			}
 		},
+		open: async (ws) => {
+			const userData = ws.getUserData();
+			ws.subscribe(`broadcast/project/${userData.project_id}`);
+		},
+		message: (ws, message, isBinary) => {
+			const userData = ws.getUserData();
+			ws.publish(`broadcast/project/${userData.project_id}`, message, isBinary);
+		},
+		drain: (ws) => {},
+		close: (ws, code, message) => {},
+	})
+	.ws("/broadcast/task/:task_id", {
+		idleTimeout: 0,
+		maxBackpressure: 1024,
+		maxPayloadLength: 512,
+		upgrade: async (res, req, context) => {
+			const database = require("./database/database.js")();
+			res.onAborted(() => {
+				res.aborted = true;
+			});
+			console.log("An Htts connection wants to become WebSocket, URL: " + req.getUrl() + "!");
+
+			try {
+				const key = req.getHeader("sec-websocket-key");
+				const protocol = req.getHeader("sec-websocket-protocol");
+				const extensions = req.getHeader("sec-websocket-extensions");
+				const token = req.getHeader("authorization");
+				const taskId = req.getParameter(0);
+				res.user = await decodeJWT(token, database);
+
+				if (res.aborted) {
+					return;
+				}
+
+				if (res.user.auth != undefined) {
+					return res
+						.cork(() => {
+							res.writeStatus("401").write(JSON.stringify({ error: "Unauthorized A" }));
+						})
+						.endWithoutBody();
+				}
+
+				return res.upgrade({ task_id: taskId }, key, protocol, extensions, context);
+			} catch {
+				return res
+					.cork(() => {
+						res.writeStatus("401").write(JSON.stringify({ error: "Unauthorized B" }));
+					})
+					.endWithoutBody();
+			}
+		},
+		open: async (ws) => {
+			const userData = ws.getUserData();
+			ws.subscribe(`broadcast/task/${userData.task_id}`);
+		},
+		message: (ws, message, isBinary) => {
+			const userData = ws.getUserData();
+			ws.publish(`broadcast/task/${userData.task_id}`, message, isBinary);
+		},
+		drain: (ws) => {},
+		close: (ws, code, message) => {},
 	})
 	.any("/*", (res, req) => {
 		res.cork(() => {
