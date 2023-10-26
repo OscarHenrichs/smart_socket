@@ -8,7 +8,7 @@ require("uWebSockets.js")
 		cert_file_name: "./misc/cert.pem",
 	})
 	.ws("/task/:project_id/:task_id", {
-		idleTimeout: 60,
+		idleTimeout: 120,
 		maxBackpressure: 1024,
 		maxPayloadLength: 512,
 		upgrade: async (res, req, context) => {
