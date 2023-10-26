@@ -50,6 +50,7 @@ require("uWebSockets.js")
 		},
 		open: (ws) => {
 			const userData = ws.getUserData();
+			
 			ws.subscribe(`${constants.broadCastTask}/${userData.task_id}`);
 			ws.subscribe(`${constants.broadCastUser}/${userData.user_id}`);
 		},
