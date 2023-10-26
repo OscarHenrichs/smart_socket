@@ -3,10 +3,7 @@ const decodeJWT = require("./modules/auth.js");
 const { redisConnect, storeBroadcastRoom, removeBroadcastRoom, getBroadcastRoom } = require("./modules/redis.js");
 
 require("uWebSockets.js")
-	.SSLApp({
-		cert_file_name: "../../../etc/letsencrypt/live/dev.websocket.smartcitizen.tec.br/fullchain.pem",
-		key_file_name: "../../../etc/letsencrypt/live/dev.websocket.smartcitizen.tec.br/privkey.pem",
-	})
+	.SSLApp()
 	.ws("/", {
 		idleTimeout: 120,
 		maxBackpressure: 1024,
