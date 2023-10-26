@@ -21,7 +21,8 @@ require("uWebSockets.js")
 				const key = req.getHeader("sec-websocket-key");
 				const protocol = req.getHeader("sec-websocket-protocol");
 				const extensions = req.getHeader("sec-websocket-extensions");
-				const executionUuid = req.getParameter(0);
+				const taskId = req.getParameter(0);
+				const executionUuid = req.getParameter(1);
 				const auth = req.getParameter(2);
 
 				res.user = await decodeJWT(auth, database);
@@ -38,7 +39,7 @@ require("uWebSockets.js")
 						.endWithoutBody();
 				}
 
-				return res.upgrade({ user_id: res.user, task_id: taskId, project_id: projectId }, key, protocol, extensions, context);
+				return res.upgrade({ user_id: res.user, task_id: taskId, execution_uuid: executionUuid }, key, protocol, extensions, context);
 			} catch {
 				return res
 					.cork(() => {
