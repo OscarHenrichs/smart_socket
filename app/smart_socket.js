@@ -50,12 +50,12 @@ require("uWebSockets.js")
 		},
 		open: (ws) => {
 			const userData = ws.getUserData();
-			ws.subscribe(`${constants.broadCastTask}/${userData.taskId}`);
+			ws.subscribe(`${constants.broadCastTask}/${userData.task_id}`);
 			ws.subscribe(`${constants.broadCastUser}/${userData.user_id}`);
 		},
 		message: (ws, message, isBinary) => {
 			const userData = ws.getUserData();
-			ws.publish(`${constants.broadCastTask}/${userData.taskId}`, message, isBinary);
+			ws.publish(`${constants.broadCastTask}/${userData.task_id}`, message, isBinary);
 			ws.publish(`${constants.broadCastUser}/${userData.user_id}`, message, isBinary);
 		},
 		drain: (ws) => {},
