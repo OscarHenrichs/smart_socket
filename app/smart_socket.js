@@ -3,7 +3,7 @@ const decodeJWT = require("./modules/auth.js");
 const { redisConnect, storeBroadcastRoom, removeBroadcastRoom, getBroadcastRoom } = require("./modules/redis.js");
 
 require("uWebSockets.js")
-	.SSLApp()
+	.App()
 	.ws("/", {
 		idleTimeout: 120,
 		maxBackpressure: 1024,
