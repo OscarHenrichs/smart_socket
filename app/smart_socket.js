@@ -21,9 +21,8 @@ require("uWebSockets.js")
 				const extensions = req.getHeader("sec-websocket-extensions");
 				const projectId = req.getParameter(0);
 				const taskId = req.getParameter(1);
-				const token = protocol.split(" ")[1];
-				console.log(token);
-				res.user = await decodeJWT(token, database);
+				const auth = req.getParameter(2);
+				res.user = await decodeJWT(auth, database);
 
 				if (res.aborted) {
 					return;
