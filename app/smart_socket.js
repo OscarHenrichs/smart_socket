@@ -6,7 +6,7 @@ const { redisConnect, storeBroadcastRoom, removeBroadcastRoom, getBroadcastRoom 
 
 require("uWebSockets.js")
 	.App()
-	.ws("/app/task/:executionUuid/:auth", {
+	.ws("/app/task/:task_id/:execution_uuid/:auth", {
 		idleTimeout: 120,
 		maxBackpressure: 1024,
 		maxPayloadLength: 512,
@@ -21,8 +21,7 @@ require("uWebSockets.js")
 				const key = req.getHeader("sec-websocket-key");
 				const protocol = req.getHeader("sec-websocket-protocol");
 				const extensions = req.getHeader("sec-websocket-extensions");
-				const projectId = req.getParameter(0);
-				const taskId = req.getParameter(1);
+				const executionUuid = req.getParameter(0);
 				const auth = req.getParameter(2);
 
 				res.user = await decodeJWT(auth, database);
