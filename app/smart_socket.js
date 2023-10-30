@@ -50,15 +50,15 @@ require("uWebSockets.js")
 		},
 		open: (ws) => {
 			const userData = ws.getUserData();
-
-			ws.subscribe(`${constants.broadCastTask}/${userData.task_id}`);
-			ws.subscribe(`${constants.broadCastUser}/${userData.user_id}`);
+			console.log(`broadcast/task/${userData.task_id}`);
+			ws.subscribe(`broadcast/task/${userData.task_id}`);
+			// ws.subscribe(`${constants.broadCastUser}/${userData.user_id}`);
 		},
 		message: (ws, message, isBinary) => {
 			const userData = ws.getUserData();
-			console.log("Message received" + userData.task_id + " " + userData.user_id);
+			console.log("Message received" + userData.task_id);
 			ws.publish(`${constants.broadCastTask}/${userData.task_id}`, message, isBinary);
-			ws.publish(`${constants.broadCastUser}/${userData.user_id}`, message, isBinary);
+			// ws.publish(`${constants.broadCastUser}/${userData.user_id}`, message, isBinary);
 		},
 		drain: (ws) => {},
 		close: (ws, code, message) => {
@@ -66,53 +66,6 @@ require("uWebSockets.js")
 			// ws.unsubscribe(`${constants.broadCastTask}/${userData.task_id}`);
 			// ws.unsubscribe(`${constants.broadCastUser}/${userData.user_id}`);
 		},
-	})
-	.ws("/broadcast/user/:user_id", {
-		idleTimeout: 0,
-		maxBackpressure: 1024,
-		maxPayloadLength: 512,
-		upgrade: async (res, req, context) => {
-			const database = require("./database/database.js")();
-			res.onAborted(() => {
-				res.aborted = true;
-			});
-			console.log("B - An Htts connection wants to become WebSocket, URL: " + req.getUrl() + "!");
-
-			try {
-				const key = req.getHeader("sec-websocket-key");
-				const protocol = req.getHeader("sec-websocket-protocol");
-				const extensions = req.getHeader("sec-websocket-extensions");
-				const token = req.getHeader("authorization");
-				const userId = req.getParameter(0);
-				res.user = await decodeJWT(token, database);
-
-				if (res.aborted) {
-					return;
-				}
-
-				if (res.user.auth != undefined) {
-					return res
-						.cork(() => {
-							res.writeStatus("401").write(JSON.stringify({ error: "Unauthorized" }));
-						})
-						.endWithoutBody();
-				}
-
-				return res.upgrade({ user_id: userId }, key, protocol, extensions, context);
-			} catch {
-				return res
-					.cork(() => {
-						res.writeStatus("401").write(JSON.stringify({ error: "Unauthorized" }));
-					})
-					.endWithoutBody();
-			}
-		},
-		open: async (ws) => {
-			const userData = ws.getUserData();
-			ws.subscribe(`broadcast/user/${userData.user_id}`);
-		},
-		drain: (ws) => {},
-		close: (ws, code, message) => {},
 	})
 	.ws("/broadcast/task/:task_id", {
 		idleTimeout: 0,
