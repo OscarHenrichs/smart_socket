@@ -1,7 +1,6 @@
 const constants = require("./config/constants.js");
 const decodeJWT = require("./modules/auth.js");
 const crypto = require("./modules/crypto.js");
-const { handleArrayBuffer } = require("./modules/tools.js");
 const { redisConnect, storeBroadcastRoom, removeBroadcastRoom, getBroadcastRoom } = require("./modules/redis.js");
 
 require("uWebSockets.js")
