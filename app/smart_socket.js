@@ -63,8 +63,8 @@ require("uWebSockets.js")
 		drain: (ws) => {},
 		close: (ws, code, message) => {
 			const userData = ws.getUserData();
-			ws.unsubscribe(`${constants.broadCastTask}/${userData.task_id}`);
-			ws.unsubscribe(`${constants.broadCastUser}/${userData.user_id}`);
+			// ws.unsubscribe(`${constants.broadCastTask}/${userData.task_id}`);
+			// ws.unsubscribe(`${constants.broadCastUser}/${userData.user_id}`);
 		},
 	})
 	.ws("/broadcast/user/:user_id", {
