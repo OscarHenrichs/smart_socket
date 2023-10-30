@@ -1,7 +1,7 @@
 const constants = require("./config/constants.js");
 const decodeJWT = require("./modules/auth.js");
 const crypto = require("./modules/crypto.js");
-
+const { handleArrayBuffer } = require("./modules/tools.js");
 const { redisConnect, storeBroadcastRoom, removeBroadcastRoom, getBroadcastRoom } = require("./modules/redis.js");
 
 require("uWebSockets.js")
@@ -15,7 +15,10 @@ require("uWebSockets.js")
 			res.onAborted(() => {
 				res.aborted = true;
 			});
-			console.log("An Htts connection wants to become WebSocket, URL: " + req.getUrl() + "!");
+
+			console.log("A - An Htts connection wants to become WebSocket, URL: " + req.getUrl() + "!");
+
+			console.log(data);
 
 			try {
 				const key = req.getHeader("sec-websocket-key");
@@ -56,13 +59,13 @@ require("uWebSockets.js")
 		},
 		message: (ws, message, isBinary) => {
 			const userData = ws.getUserData();
+			console.log("Message received" + userData.task_id + " " + userData.user_id);
 			ws.publish(`${constants.broadCastTask}/${userData.task_id}`, message, isBinary);
 			ws.publish(`${constants.broadCastUser}/${userData.user_id}`, message, isBinary);
 		},
 		drain: (ws) => {},
 		close: (ws, code, message) => {
 			const userData = ws.getUserData();
-			ws.unsubscribe(`${constants.broadCastProject}/${userData.project_id}`);
 			ws.unsubscribe(`${constants.broadCastTask}/${userData.task_id}`);
 			ws.unsubscribe(`${constants.broadCastUser}/${userData.user_id}`);
 		},
@@ -76,7 +79,7 @@ require("uWebSockets.js")
 			res.onAborted(() => {
 				res.aborted = true;
 			});
-			console.log("An Htts connection wants to become WebSocket, URL: " + req.getUrl() + "!");
+			console.log("B - An Htts connection wants to become WebSocket, URL: " + req.getUrl() + "!");
 
 			try {
 				const key = req.getHeader("sec-websocket-key");
@@ -123,7 +126,7 @@ require("uWebSockets.js")
 			res.onAborted(() => {
 				res.aborted = true;
 			});
-			console.log("An Htts connection wants to become WebSocket, URL: " + req.getUrl() + "!");
+			console.log("C - An Htts connection wants to become WebSocket, URL: " + req.getUrl() + "!");
 
 			try {
 				const key = req.getHeader("sec-websocket-key");
