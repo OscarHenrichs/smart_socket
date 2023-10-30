@@ -17,8 +17,6 @@ require("uWebSockets.js")
 
 			console.log("A - An Htts connection wants to become WebSocket, URL: " + req.getUrl() + "!");
 
-			console.log(data);
-
 			try {
 				const key = req.getHeader("sec-websocket-key");
 				const protocol = req.getHeader("sec-websocket-protocol");
