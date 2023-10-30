@@ -110,6 +110,7 @@ require("uWebSockets.js")
 		},
 		open: async (ws) => {
 			const userData = ws.getUserData();
+			console.log(`broadcast/task/${userData.task_id}`);
 			ws.subscribe(`broadcast/task/${userData.task_id}`);
 		},
 		message: (ws, message, isBinary) => {
