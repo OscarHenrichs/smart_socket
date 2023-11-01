@@ -5,7 +5,7 @@ const { redisConnect, storeBroadcastRoom, removeBroadcastRoom, getBroadcastRoom 
 
 require("uWebSockets.js")
 	.App()
-	.ws("/app/task/:task_id/:execution_uuid/:auth", {
+	.ws("/app/task/:task_id/:execution_uuid/:user_token", {
 		idleTimeout: 120,
 		maxBackpressure: 1024,
 		maxPayloadLength: 512,
@@ -52,19 +52,18 @@ require("uWebSockets.js")
 			const userData = ws.getUserData();
 			console.log(`broadcast/task/${userData.task_id}`);
 			ws.subscribe(`broadcast/task/${userData.task_id}`);
-			// ws.subscribe(`${constants.broadCastUser}/${userData.user_id}`);
+
 		},
 		message: (ws, message, isBinary) => {
 			const userData = ws.getUserData();
 			console.log("Message received" + userData.task_id);
 			ws.publish(`${constants.broadCastTask}/${userData.task_id}`, message, isBinary);
-			// ws.publish(`${constants.broadCastUser}/${userData.user_id}`, message, isBinary);
+
 		},
 		drain: (ws) => {},
 		close: (ws, code, message) => {
 			const userData = ws.getUserData();
-			// ws.unsubscribe(`${constants.broadCastTask}/${userData.task_id}`);
-			// ws.unsubscribe(`${constants.broadCastUser}/${userData.user_id}`);
+
 		},
 	})
 	.ws("/broadcast/task/:task_id", {
